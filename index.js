@@ -2,7 +2,7 @@
 
 const {
   Client, GatewayIntentBits, Events, EmbedBuilder, SlashCommandBuilder,
-  MessageFlags, PermissionFlagsBits,
+  MessageFlags, PermissionFlagsBits, ActivityType,
 } = require('discord.js');
 const {
   joinVoiceChannel, entersState, getVoiceConnection, generateDependencyReport,
@@ -18,8 +18,16 @@ if (!token) {
   process.exit(1);
 }
 
+// Same presence as bot.py (Do Not Disturb + Listening to). Both programs use the same token,
+// so this one must NOT go online, otherwise it overrides the red Do Not Disturb dot.
+const PRESENCE = {
+  status: 'dnd',
+  activities: [{ name: '!help | /help', type: ActivityType.Listening }],
+};
+
 const client = new Client({
   intents: [GatewayIntentBits.Guilds, GatewayIntentBits.GuildVoiceStates],
+  presence: PRESENCE,
 });
 
 process.on('unhandledRejection', (e) => console.error('[unhandledRejection]', e));
@@ -148,6 +156,7 @@ async function autoJoin() {
 client.once(Events.ClientReady, async () => {
   console.log(`[allmas] logged in as ${client.user.tag}`);
   console.log(generateDependencyReport());
+  client.user.setPresence(PRESENCE);
 
   // add /join-vc-allmas in every server WITHOUT deleting any other command
   for (const guild of client.guilds.cache.values()) await registerCommands(guild);
