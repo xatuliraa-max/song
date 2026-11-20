@@ -157,6 +157,7 @@ client.once(Events.ClientReady, async () => {
   console.log(`[allmas] logged in as ${client.user.tag}`);
   console.log(generateDependencyReport());
   client.user.setPresence(PRESENCE);
+  console.log('[allmas] build v3 - presence = dnd');
 
   // add /join-vc-allmas in every server WITHOUT deleting any other command
   for (const guild of client.guilds.cache.values()) await registerCommands(guild);
