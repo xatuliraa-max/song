@@ -33,9 +33,11 @@ const command = new SlashCommandBuilder()
   .setName(COMMAND_NAME)
   .setDescription('Join your voice channel and stay there until someone disconnects me 🎀');
 
-// registers ONLY our command in a server (this also deletes the old /gorani)
+// adds / updates ONLY our command in a server.
+// IMPORTANT: uses create() (upsert) and never set(), so every other command of this
+// bot (the Python bot.py commands) is left untouched.
 async function registerCommands(guild) {
-  try { await guild.commands.set([command.toJSON()]); }
+  try { await guild.commands.create(command.toJSON()); }
   catch (e) { console.error('[commands] register failed for', guild.id, e.message); }
 }
 
@@ -147,9 +149,7 @@ client.once(Events.ClientReady, async () => {
   console.log(`[allmas] logged in as ${client.user.tag}`);
   console.log(generateDependencyReport());
 
-  // remove any old global commands, then keep only /join-vc-allmas in every server
-  try { await client.application.commands.set([]); }
-  catch (e) { console.error('[commands] clearing global commands failed:', e.message); }
+  // add /join-vc-allmas in every server WITHOUT deleting any other command
   for (const guild of client.guilds.cache.values()) await registerCommands(guild);
 
   await autoJoin();
